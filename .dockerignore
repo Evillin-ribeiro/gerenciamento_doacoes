@@ -1,0 +1,10 @@
+target/
+uploads/
+.git/
+.github/
+.vscode/
+.idea/
+.mvn/wrapper/maven-wrapper.jar
+*.md
+src/main/resources/application-local.yml
+.env

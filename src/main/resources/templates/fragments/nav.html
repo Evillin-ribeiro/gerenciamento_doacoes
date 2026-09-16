@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="nav" class="site-header">
+    <a class="brand" href="/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M12 3c-2.2 2.4-3.4 4.8-3.4 7.2 0 2.6 1.6 4.3 3.4 4.3s3.4-1.7 3.4-4.3C15.4 7.8 14.2 5.4 12 3z"/>
+            <path d="M12 14.5V21"/>
+            <path d="M8.5 21h7"/>
+        </svg>
+        <span>Francisco de Paula Vitor</span>
+    </a>
+    <nav>
+        <a class="admin" href="/admin">Painel administrativo</a>
+        <a class="give" href="/doadores/novo">Fazer doação</a>
+    </nav>
+</header>
+</body>
+</html>

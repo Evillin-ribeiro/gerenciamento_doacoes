@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: gestaodoacoes
+  profiles:
+    active: local
+  flyway:
+    enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  thymeleaf:
+    cache: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+uploads:
+  comprovantes-dir: ./uploads/comprovantes
+
+jwt:
+  expiration-ms: 28800000 # 8 horas

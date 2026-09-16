@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/gestao_doacoes
+    username: gestao_doacoes_app
+    password: SUA_SENHA_AQUI
+
+jwt:
+  secret: GERE_UM_VALOR_ALEATORIO_LONGO_AQUI
+
+# Copie este arquivo para application-local.yml (git-ignorado) e preencha os valores reais.
+# Gerar um secret JWT: openssl rand -base64 48
