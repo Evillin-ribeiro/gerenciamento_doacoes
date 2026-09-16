@@ -1,8 +1,7 @@
 # Sistema de Gerenciamento de Doações
 
 Sistema web para gestão de doações (itens físicos e financeiras), agendamento de entregas
-presenciais, controle de estoque e distribuição a beneficiários — desenvolvido para a
-**Associação Espírita de Estudos Evangélicos Francisco de Paula Vitor**.
+presenciais, controle de estoque e distribuição a beneficiários desenvolvido para uma uma entidade beneficente e religiosa.
 
 O sistema tem dois fluxos principais:
 
@@ -50,6 +49,6 @@ cp src/main/resources/application-local.yml.example src/main/resources/applicati
 ./mvnw test
 ```
 
-Cobre regras de negócio (testes unitários com Mockito) e os fluxos ponta a ponta — autenticação,
-doação de item físico, doação financeira, agendamento e distribuição — via testes de integração
+Cobre regras de negócio (testes unitários com Mockito) e os fluxos ponta a ponta autenticação,
+doação de item físico, doação financeira, agendamento e distribuição via testes de integração
 com MockMvc contra um banco H2 em memória (não precisa de MySQL para rodar a suíte).
