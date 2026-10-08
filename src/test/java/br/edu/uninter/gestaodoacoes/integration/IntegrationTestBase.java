@@ -20,8 +20,8 @@ import br.edu.uninter.gestaodoacoes.dto.LoginRequestDTO;
 @Transactional
 abstract class IntegrationTestBase {
 
-    protected static final String ADMIN_EMAIL = "admin@example.com";
-    protected static final String ADMIN_SENHA = "2026@Admin";
+    protected static final String ADMIN_EMAIL = "admin@ong.com";
+    protected static final String ADMIN_SENHA = "admin2026";
 
     @Autowired
     protected MockMvc mockMvc;

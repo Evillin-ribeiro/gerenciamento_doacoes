@@ -73,15 +73,22 @@ public class DistribuicaoService {
     }
 
     private DistribuicaoResponseDTO toResponseDTO(Distribuicao distribuicao) {
-        List<DistribuicaoItemResponseDTO> itens = movimentacaoEstoqueRepository
-                .findByReferenciaDistribuicaoId(distribuicao.getId()).stream()
+        List<MovimentacaoEstoque> movimentacoes = movimentacaoEstoqueRepository
+                .findByReferenciaDistribuicaoId(distribuicao.getId());
+
+        List<DistribuicaoItemResponseDTO> itens = movimentacoes.stream()
                 .map(this::toItemResponseDTO)
                 .toList();
+
+        String voluntarioNome = movimentacoes.isEmpty() || movimentacoes.get(0).getUsuario() == null
+                ? null
+                : movimentacoes.get(0).getUsuario().getNome();
 
         return new DistribuicaoResponseDTO(
                 distribuicao.getId(),
                 distribuicao.getData(),
                 distribuicao.getBeneficiario(),
+                voluntarioNome,
                 distribuicao.getObservacao(),
                 itens
         );

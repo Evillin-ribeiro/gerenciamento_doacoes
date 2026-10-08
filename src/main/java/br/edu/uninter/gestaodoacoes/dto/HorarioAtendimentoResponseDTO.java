@@ -8,6 +8,8 @@ public record HorarioAtendimentoResponseDTO(
         DayOfWeek diaSemana,
         LocalTime horaInicio,
         LocalTime horaFim,
-        Integer capacidadeMaxima
+        Integer capacidadeMaxima,
+        Long usuarioId,
+        String usuarioNome
 ) {
 }

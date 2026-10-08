@@ -1,5 +1,3 @@
--- Itens de exemplo para viabilizar testes da Fase 2 (cadastro de doacao de item fisico).
--- Substituir/complementar pelo catalogo real da associacao quando definido.
 INSERT INTO estoque (descricao_item, categoria, unidade_medida, quantidade_atual) VALUES
     ('Arroz', 'ALIMENTO', 'kg', 0),
     ('Feijao', 'ALIMENTO', 'kg', 0),

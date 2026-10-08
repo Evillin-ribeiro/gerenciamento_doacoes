@@ -16,11 +16,6 @@ import br.edu.uninter.gestaodoacoes.dto.AgendamentoRequestDTO;
 import br.edu.uninter.gestaodoacoes.dto.AgendamentoResponseDTO;
 import br.edu.uninter.gestaodoacoes.service.AgendamentoService;
 
-/**
- * Fluxo publico de agendamento de entrega presencial (tela Thymeleaf), reaproveitando o
- * AgendamentoService diretamente. A consulta de disponibilidade em si roda via JS chamando
- * a API publica GET /api/agendamentos/disponibilidade.
- */
 @Controller
 @RequestMapping("/agendamentos")
 public class AgendamentoWebController {

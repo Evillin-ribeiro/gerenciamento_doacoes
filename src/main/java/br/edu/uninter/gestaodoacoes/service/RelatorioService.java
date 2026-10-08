@@ -21,10 +21,6 @@ import br.edu.uninter.gestaodoacoes.model.TipoMovimentacao;
 import br.edu.uninter.gestaodoacoes.repository.DoacaoFinanceiraRepository;
 import br.edu.uninter.gestaodoacoes.repository.MovimentacaoEstoqueRepository;
 
-/**
- * Relatorio de prestacao de contas (RF09): entradas/saidas de itens fisicos por item,
- * mais o total arrecadado em doacoes financeiras confirmadas, dentro de um periodo.
- */
 @Service
 @Transactional(readOnly = true)
 public class RelatorioService {

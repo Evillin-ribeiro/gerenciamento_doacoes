@@ -18,10 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import br.edu.uninter.gestaodoacoes.exception.RegraNegocioException;
 import br.edu.uninter.gestaodoacoes.exception.ResourceNotFoundException;
 
-/**
- * Responsavel apenas pelo I/O do comprovante em disco local (pasta configuravel,
- * fora do controle de versao). Regras de negocio da doacao financeira ficam em DoacaoFinanceiraService.
- */
 @Service
 public class ComprovanteStorageService {
 

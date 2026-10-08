@@ -8,10 +8,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-/**
- * itens e obrigatorio para tipo ALIMENTO/ROUPA/ITEM_DIVERSO; valor e obrigatorio para FINANCEIRA.
- * A validacao condicional e feita pela DoacaoStrategy correspondente ao tipo.
- */
 public record DoacaoRequestDTO(
         @NotNull Long doadorId,
         @NotNull TipoDoacao tipo,

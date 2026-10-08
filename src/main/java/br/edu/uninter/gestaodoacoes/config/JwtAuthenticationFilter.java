@@ -55,7 +55,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Token invalido/expirado: segue sem autenticar, a regra de acesso da rota decide o resto (401/403).
             SecurityContextHolder.clearContext();
         }
 

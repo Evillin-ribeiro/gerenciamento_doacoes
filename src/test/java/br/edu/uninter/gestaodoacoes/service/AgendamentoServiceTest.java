@@ -43,7 +43,6 @@ class AgendamentoServiceTest {
 
     private AgendamentoService agendamentoService;
 
-    // proxima segunda-feira a partir de hoje (sempre no futuro), para os testes nao dependerem do dia em que rodam
     private final LocalDate proximaSegunda = LocalDate.now()
             .with(TemporalAdjusters.next(DayOfWeek.MONDAY));
 

@@ -10,10 +10,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- * Usado pelos handlers de erro do Spring Security (401/403), que rodam fora do MVC dispatcher
- * e por isso nao tem acesso ao ObjectMapper/HttpMessageConverter gerenciado pelo Spring MVC.
- */
 final class JsonErrorWriter {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()

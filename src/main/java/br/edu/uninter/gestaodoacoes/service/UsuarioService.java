@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.edu.uninter.gestaodoacoes.dto.UsuarioRequestDTO;
 import br.edu.uninter.gestaodoacoes.dto.UsuarioResponseDTO;
+import br.edu.uninter.gestaodoacoes.dto.UsuarioResumoDTO;
 import br.edu.uninter.gestaodoacoes.exception.ResourceNotFoundException;
 import br.edu.uninter.gestaodoacoes.model.Usuario;
 import br.edu.uninter.gestaodoacoes.repository.UsuarioRepository;
@@ -44,6 +45,13 @@ public class UsuarioService {
     public List<UsuarioResponseDTO> listar() {
         return usuarioRepository.findAll().stream()
                 .map(this::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UsuarioResumoDTO> listarResumo() {
+        return usuarioRepository.findAll().stream()
+                .map(usuario -> new UsuarioResumoDTO(usuario.getId(), usuario.getNome()))
                 .toList();
     }
 

@@ -34,12 +34,14 @@ class EstoqueServiceTest {
     private EstoqueRepository estoqueRepository;
     @Mock
     private MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+    @Mock
+    private UsuarioService usuarioService;
 
     private EstoqueService estoqueService;
 
     @BeforeEach
     void setUp() {
-        estoqueService = new EstoqueService(estoqueRepository, movimentacaoEstoqueRepository);
+        estoqueService = new EstoqueService(estoqueRepository, movimentacaoEstoqueRepository, usuarioService);
     }
 
     @Test

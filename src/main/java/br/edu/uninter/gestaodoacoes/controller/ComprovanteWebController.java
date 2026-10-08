@@ -12,10 +12,6 @@ import org.springframework.web.util.HtmlUtils;
 
 import br.edu.uninter.gestaodoacoes.service.DoacaoFinanceiraService;
 
-/**
- * Fluxo publico de upload do comprovante de doacao financeira (tela Thymeleaf),
- * reaproveitando o DoacaoFinanceiraService diretamente.
- */
 @Controller
 @RequestMapping("/doacoes/{id}/comprovante")
 public class ComprovanteWebController {

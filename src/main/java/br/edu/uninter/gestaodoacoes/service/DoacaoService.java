@@ -78,9 +78,6 @@ public class DoacaoService {
         return toResponseDTO(doacao);
     }
 
-    /**
-     * Confirma uma doacao PENDENTE. Para itens fisicos, da entrada automatica no estoque (RF07).
-     */
     public DoacaoResponseDTO confirmar(Long id, ConfirmarDoacaoRequestDTO request) {
         Doacao doacao = buscarEntidadePorId(id);
         if (doacao.getStatus() != StatusDoacao.PENDENTE) {
@@ -102,9 +99,6 @@ public class DoacaoService {
         return toResponseDTO(doacao);
     }
 
-    /**
-     * Cancela uma doacao PENDENTE. Nao permitido apos CONFIRMADA para nao exigir estorno de estoque.
-     */
     public DoacaoResponseDTO cancelar(Long id) {
         Doacao doacao = buscarEntidadePorId(id);
         if (doacao.getStatus() != StatusDoacao.PENDENTE) {
@@ -155,6 +149,7 @@ public class DoacaoService {
         return new DoacaoResponseDTO(
                 doacao.getId(),
                 doacao.getDoador().getId(),
+                doacao.getDoador().getNome(),
                 doacao.getTipo(),
                 doacao.getStatus(),
                 doacao.getDataCriacao(),

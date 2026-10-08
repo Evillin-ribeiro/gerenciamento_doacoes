@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.uninter.gestaodoacoes.dto.UsuarioRequestDTO;
 import br.edu.uninter.gestaodoacoes.dto.UsuarioResponseDTO;
+import br.edu.uninter.gestaodoacoes.dto.UsuarioResumoDTO;
 import br.edu.uninter.gestaodoacoes.service.UsuarioService;
 import jakarta.validation.Valid;
 
@@ -40,5 +41,10 @@ public class UsuarioController {
     @GetMapping
     public List<UsuarioResponseDTO> listar() {
         return usuarioService.listar();
+    }
+
+    @GetMapping("/resumo")
+    public List<UsuarioResumoDTO> listarResumo() {
+        return usuarioService.listarResumo();
     }
 }

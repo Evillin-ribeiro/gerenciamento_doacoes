@@ -10,6 +10,7 @@ import br.edu.uninter.gestaodoacoes.dto.HorarioAtendimentoResponseDTO;
 import br.edu.uninter.gestaodoacoes.exception.RegraNegocioException;
 import br.edu.uninter.gestaodoacoes.exception.ResourceNotFoundException;
 import br.edu.uninter.gestaodoacoes.model.HorarioAtendimento;
+import br.edu.uninter.gestaodoacoes.model.Usuario;
 import br.edu.uninter.gestaodoacoes.repository.HorarioAtendimentoRepository;
 
 @Service
@@ -17,9 +18,12 @@ import br.edu.uninter.gestaodoacoes.repository.HorarioAtendimentoRepository;
 public class HorarioAtendimentoService {
 
     private final HorarioAtendimentoRepository horarioAtendimentoRepository;
+    private final UsuarioService usuarioService;
 
-    public HorarioAtendimentoService(HorarioAtendimentoRepository horarioAtendimentoRepository) {
+    public HorarioAtendimentoService(HorarioAtendimentoRepository horarioAtendimentoRepository,
+                                      UsuarioService usuarioService) {
         this.horarioAtendimentoRepository = horarioAtendimentoRepository;
+        this.usuarioService = usuarioService;
     }
 
     public HorarioAtendimentoResponseDTO criar(HorarioAtendimentoRequestDTO request) {
@@ -30,6 +34,7 @@ public class HorarioAtendimentoService {
                 .horaInicio(request.horaInicio())
                 .horaFim(request.horaFim())
                 .capacidadeMaxima(request.capacidadeMaxima())
+                .usuario(resolverUsuario(request.usuarioId()))
                 .build();
 
         return toResponseDTO(horarioAtendimentoRepository.save(horario));
@@ -55,6 +60,7 @@ public class HorarioAtendimentoService {
         horario.setHoraInicio(request.horaInicio());
         horario.setHoraFim(request.horaFim());
         horario.setCapacidadeMaxima(request.capacidadeMaxima());
+        horario.setUsuario(resolverUsuario(request.usuarioId()));
 
         return toResponseDTO(horarioAtendimentoRepository.save(horario));
     }
@@ -75,13 +81,20 @@ public class HorarioAtendimentoService {
         }
     }
 
+    private Usuario resolverUsuario(Long usuarioId) {
+        return usuarioId == null ? null : usuarioService.buscarEntidadePorId(usuarioId);
+    }
+
     private HorarioAtendimentoResponseDTO toResponseDTO(HorarioAtendimento horario) {
+        Usuario usuario = horario.getUsuario();
         return new HorarioAtendimentoResponseDTO(
                 horario.getId(),
                 horario.getDiaSemana(),
                 horario.getHoraInicio(),
                 horario.getHoraFim(),
-                horario.getCapacidadeMaxima()
+                horario.getCapacidadeMaxima(),
+                usuario == null ? null : usuario.getId(),
+                usuario == null ? null : usuario.getNome()
         );
     }
 }

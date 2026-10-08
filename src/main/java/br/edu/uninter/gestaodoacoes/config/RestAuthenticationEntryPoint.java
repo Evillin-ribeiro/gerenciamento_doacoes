@@ -11,10 +11,6 @@ import br.edu.uninter.gestaodoacoes.exception.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- * Substitui a pagina de erro padrao do Spring Security por um JSON consistente com o resto da API
- * quando uma rota autenticada e acessada sem token (ou com token invalido/expirado).
- */
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 

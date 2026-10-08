@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.edu.uninter.gestaodoacoes.dto.EstoqueEntradaRequestDTO;
 import br.edu.uninter.gestaodoacoes.dto.EstoqueRequestDTO;
 import br.edu.uninter.gestaodoacoes.dto.EstoqueResponseDTO;
 import br.edu.uninter.gestaodoacoes.service.EstoqueService;
@@ -46,5 +47,10 @@ public class EstoqueController {
     @PutMapping("/{id}")
     public EstoqueResponseDTO atualizar(@PathVariable Long id, @Valid @RequestBody EstoqueRequestDTO request) {
         return estoqueService.atualizar(id, request);
+    }
+
+    @PostMapping("/{id}/entrada")
+    public EstoqueResponseDTO entrada(@PathVariable Long id, @Valid @RequestBody EstoqueEntradaRequestDTO request) {
+        return estoqueService.entradaManual(id, request.quantidade(), request.usuarioId());
     }
 }

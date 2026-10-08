@@ -14,14 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Matriz de acesso da API (RF10/RF11):
- * - Publico: fluxo do doador (cadastro, criar doacao, upload de comprovante, ver dados bancarios/estoque/horarios,
- *   consultar disponibilidade e agendar) e login.
- * - Autenticado (ADMIN ou VOLUNTARIO): gestao operacional (confirmar/cancelar doacao, download de comprovante,
- *   listar doadores/doacoes/agendamentos, gerenciar estoque, distribuicoes, relatorios).
- * - Somente ADMIN: usuarios, CRUD de horarios de atendimento, atualizar dados bancarios.
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -60,19 +52,14 @@ public class SecurityConfig {
                         .authenticationEntryPoint(restAuthenticationEntryPoint)
                         .accessDeniedHandler(restAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
-                        // Documentacao / Swagger
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                        // Recursos estaticos e paginas Thymeleaf publicas
                         .requestMatchers("/", "/css/**", "/js/**", "/webjars/**").permitAll()
                         .requestMatchers("/doadores/**", "/doacoes/**", "/agendamentos/**").permitAll()
-                        // Shell do painel admin: a protecao real acontece nas chamadas fetch() a /api/**
                         .requestMatchers("/admin/**").permitAll()
 
-                        // Autenticacao
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // Fluxo publico do doador
                         .requestMatchers(HttpMethod.POST, "/api/doadores").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/doacoes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/doacoes/{id:[0-9]+}").permitAll()
@@ -83,14 +70,16 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/agendamentos/disponibilidade").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/agendamentos").permitAll()
 
-                        // Somente ADMIN
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/resumo").authenticated()
+
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/horarios-atendimento").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/horarios-atendimento/**").hasRole("ADMIN")
+                        .requestMatchers("/api/relatorios/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/horarios-atendimento/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/dados-bancarios").hasRole("ADMIN")
 
-                        // Todo o restante exige login (ADMIN ou VOLUNTARIO)
+                        .requestMatchers(HttpMethod.POST, "/api/horarios-atendimento").hasAnyRole("ADMIN", "VOLUNTARIO")
+                        .requestMatchers(HttpMethod.PUT, "/api/horarios-atendimento/**").hasAnyRole("ADMIN", "VOLUNTARIO")
+
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

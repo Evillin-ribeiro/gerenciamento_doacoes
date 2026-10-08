@@ -10,6 +10,11 @@ public record HorarioAtendimentoRequestDTO(
         @NotNull DayOfWeek diaSemana,
         @NotNull LocalTime horaInicio,
         @NotNull LocalTime horaFim,
-        @NotNull @Positive Integer capacidadeMaxima
+        @NotNull @Positive Integer capacidadeMaxima,
+        Long usuarioId
 ) {
+    public HorarioAtendimentoRequestDTO(DayOfWeek diaSemana, LocalTime horaInicio, LocalTime horaFim,
+                                         Integer capacidadeMaxima) {
+        this(diaSemana, horaInicio, horaFim, capacidadeMaxima, null);
+    }
 }

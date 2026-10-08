@@ -26,22 +26,44 @@ public class EstoqueService {
 
     private final EstoqueRepository estoqueRepository;
     private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+    private final UsuarioService usuarioService;
 
     public EstoqueService(EstoqueRepository estoqueRepository,
-                           MovimentacaoEstoqueRepository movimentacaoEstoqueRepository) {
+                           MovimentacaoEstoqueRepository movimentacaoEstoqueRepository,
+                           UsuarioService usuarioService) {
         this.estoqueRepository = estoqueRepository;
         this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
+        this.usuarioService = usuarioService;
     }
 
     public EstoqueResponseDTO criar(EstoqueRequestDTO request) {
+        estoqueRepository.findByDescricaoItemIgnoreCase(request.descricaoItem().trim())
+                .ifPresent(existente -> {
+                    throw new RegraNegocioException("Item '" + existente.getDescricaoItem()
+                            + "' ja cadastrado no catalogo. Selecione-o na lista em vez de cadastrar novamente.");
+                });
+
         Estoque estoque = Estoque.builder()
-                .descricaoItem(request.descricaoItem())
+                .descricaoItem(request.descricaoItem().trim())
                 .categoria(request.categoria())
                 .unidadeMedida(request.unidadeMedida())
                 .quantidadeAtual(BigDecimal.ZERO)
                 .build();
+        estoque = estoqueRepository.save(estoque);
 
-        return toResponseDTO(estoqueRepository.save(estoque));
+        if (request.quantidadeInicial() != null && request.quantidadeInicial().signum() > 0 && request.usuarioId() != null) {
+            Usuario usuario = usuarioService.buscarEntidadePorId(request.usuarioId());
+            registrarEntrada(estoque, request.quantidadeInicial(), usuario, null);
+        }
+
+        return toResponseDTO(estoque);
+    }
+
+    public EstoqueResponseDTO entradaManual(Long estoqueId, BigDecimal quantidade, Long usuarioId) {
+        Estoque estoque = buscarEntidadePorId(estoqueId);
+        Usuario usuario = usuarioService.buscarEntidadePorId(usuarioId);
+        registrarEntrada(estoque, quantidade, usuario, null);
+        return toResponseDTO(estoque);
     }
 
     public EstoqueResponseDTO obterOuCriarItemDiverso(String descricaoItem) {
@@ -83,9 +105,6 @@ public class EstoqueService {
                 .orElseThrow(() -> new ResourceNotFoundException("Item de estoque nao encontrado: id " + id));
     }
 
-    /**
-     * Da entrada de um item fisico doado, atualizando o saldo e registrando a movimentacao (RF07).
-     */
     void registrarEntrada(Estoque estoque, BigDecimal quantidade, Usuario usuario, Doacao doacaoReferencia) {
         estoque.setQuantidadeAtual(estoque.getQuantidadeAtual().add(quantidade));
         estoqueRepository.save(estoque);
@@ -102,9 +121,6 @@ public class EstoqueService {
         movimentacaoEstoqueRepository.save(movimentacao);
     }
 
-    /**
-     * Registra a saida de um item distribuido a um beneficiario, validando saldo disponivel (RF08).
-     */
     void registrarSaida(Estoque estoque, BigDecimal quantidade, Usuario usuario, Distribuicao distribuicaoReferencia) {
         if (estoque.getQuantidadeAtual().compareTo(quantidade) < 0) {
             throw new RegraNegocioException("Estoque insuficiente para '" + estoque.getDescricaoItem()

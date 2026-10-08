@@ -27,10 +27,6 @@ import br.edu.uninter.gestaodoacoes.service.DadosBancariosService;
 import br.edu.uninter.gestaodoacoes.service.DoacaoService;
 import br.edu.uninter.gestaodoacoes.service.EstoqueService;
 
-/**
- * Fluxo publico de criacao/consulta de doacao (telas Thymeleaf), reaproveitando os services
- * diretamente em vez de chamar a API REST via HTTP.
- */
 @Controller
 @RequestMapping("/doacoes")
 public class DoacaoWebController {

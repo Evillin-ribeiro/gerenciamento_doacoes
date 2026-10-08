@@ -7,6 +7,7 @@ public record DistribuicaoResponseDTO(
         Long id,
         LocalDateTime data,
         String beneficiario,
+        String voluntarioNome,
         String observacao,
         List<DistribuicaoItemResponseDTO> itens
 ) {

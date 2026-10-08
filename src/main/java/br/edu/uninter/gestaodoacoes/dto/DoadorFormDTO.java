@@ -4,10 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Classe mutavel (nao record) usada apenas para data-binding de formulario Thymeleaf.
- * Convertida para DoadorRequestDTO antes de chamar o service.
- */
 @Getter
 @Setter
 @NoArgsConstructor

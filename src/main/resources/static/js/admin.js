@@ -1,6 +1,3 @@
-// Painel administrativo: toda a protecao real acontece nas chamadas fetch() abaixo,
-// que anexam o token JWT (guardado em sessionStorage apos o login) no header Authorization.
-
 function getToken() { return sessionStorage.getItem('token'); }
 function getRole() { return sessionStorage.getItem('role'); }
 function getUsuarioId() { return sessionStorage.getItem('usuarioId'); }
@@ -31,13 +28,19 @@ function formatarData(iso) {
     return iso.replace('T', ' ').substring(0, 16);
 }
 
+function mensagemErro(e) {
+    if (e && Array.isArray(e.detalhes) && e.detalhes.length > 0) {
+        return (e.message || 'Erro de validacao') + ': ' + e.detalhes.join('; ');
+    }
+    return (e && e.message) || 'Ocorreu um erro inesperado.';
+}
+
 function escapeHtml(texto) {
     const div = document.createElement('div');
     div.textContent = texto == null ? '' : String(texto);
     return div.innerHTML;
 }
 
-// ---------- Helpers visuais compartilhados por todas as secoes ----------
 function pageHead(titulo, subtext) {
     return '<div class="page-head"><div><h1>' + escapeHtml(titulo) + '</h1>' +
         (subtext ? '<p class="subtext">' + escapeHtml(subtext) + '</p>' : '') + '</div></div>';
@@ -68,7 +71,6 @@ function statusBadge(status) {
     return '<span class="badge-status ' + cls + '">' + label + '</span>';
 }
 
-// ---------- Secao: Doacoes ----------
 let doacoesCache = [];
 
 function renderDoacoes() {
@@ -89,7 +91,7 @@ function renderDoacoes() {
         '<option value="PENDENTE">Pendente</option><option value="CONFIRMADA">Confirmada</option>' +
         '<option value="ENTREGUE">Entregue</option><option value="CANCELADA">Cancelada</option></select>' +
         '</div>' +
-        '<div class="table-wrap"><table><thead><tr><th>ID</th><th>Tipo</th><th>Status</th><th>Data</th><th>Detalhe</th><th>Ações</th></tr></thead>' +
+        '<div class="table-wrap"><table><thead><tr><th>ID</th><th>Tipo</th><th>Status</th><th>Doador</th><th>Data</th><th>Detalhe</th><th>Ações</th></tr></thead>' +
         '<tbody id="corpoDoacoes"></tbody></table></div>' +
         '<div class="foot-row"><span id="contadorDoacoes"></span></div>';
 
@@ -107,6 +109,23 @@ function detalheDoacao(d) {
     return d.tipo === 'FINANCEIRA'
         ? ('R$ ' + (d.valor || '0'))
         : (d.itens || []).map(function (i) { return i.quantidade + ' ' + i.unidadeMedida + ' ' + i.descricaoItem; }).join(', ');
+}
+
+function celulaDetalheDoacao(d) {
+    const texto = escapeHtml(detalheDoacao(d));
+    if (d.tipo !== 'FINANCEIRA' || !d.comprovanteUrl) { return texto; }
+    return texto + ' <button type="button" class="btn-link-comprovante" onclick="verComprovante(' + d.id + ')">Ver comprovante</button>';
+}
+
+function verComprovante(id) {
+    api('/api/doacoes/' + id + '/comprovante').then(function (r) {
+        if (!r.ok) { throw new Error('Nao foi possivel abrir o comprovante.'); }
+        return r.blob();
+    }).then(function (blob) {
+        window.open(URL.createObjectURL(blob), '_blank');
+    }).catch(function (e) {
+        document.getElementById('msgDoacoes').innerHTML = '<div class="alert alert-danger">' + escapeHtml(e.message) + '</div>';
+    });
 }
 
 function filtrarDoacoes() {
@@ -127,8 +146,9 @@ function filtrarDoacoes() {
             '<td class="id-cell">' + d.id + '</td>' +
             '<td>' + tipoCell(d.tipo) + '</td>' +
             '<td>' + statusBadge(d.status) + '</td>' +
+            '<td>' + escapeHtml(d.doadorNome || '') + '</td>' +
             '<td>' + formatarData(d.dataCriacao) + '</td>' +
-            '<td class="det">' + escapeHtml(detalheDoacao(d)) + '</td>' +
+            '<td class="det">' + celulaDetalheDoacao(d) + '</td>' +
             '<td>' + (d.status === 'PENDENTE'
                 ? '<div class="actions"><button class="btn-confirm" onclick="confirmarDoacao(' + d.id + ')">Confirmar</button>' +
                     '<button class="btn-cancel" onclick="cancelarDoacao(' + d.id + ')">Cancelar</button></div>'
@@ -144,7 +164,7 @@ function filtrarDoacoes() {
 function confirmarDoacao(id) {
     apiJson('/api/doacoes/' + id + '/confirmar', 'POST', { usuarioId: Number(getUsuarioId()) })
         .then(function (r) {
-            if (!r.ok) { return r.json().then(function (e) { throw new Error(e.message); }); }
+            if (!r.ok) { return r.json().then(function (e) { throw new Error(mensagemErro(e)); }); }
             renderDoacoes();
         })
         .catch(function (e) { document.getElementById('msgDoacoes').innerHTML = '<div class="alert alert-danger">' + escapeHtml(e.message) + '</div>'; });
@@ -153,13 +173,12 @@ function confirmarDoacao(id) {
 function cancelarDoacao(id) {
     api('/api/doacoes/' + id + '/cancelar', { method: 'POST' })
         .then(function (r) {
-            if (!r.ok) { return r.json().then(function (e) { throw new Error(e.message); }); }
+            if (!r.ok) { return r.json().then(function (e) { throw new Error(mensagemErro(e)); }); }
             renderDoacoes();
         })
         .catch(function (e) { document.getElementById('msgDoacoes').innerHTML = '<div class="alert alert-danger">' + escapeHtml(e.message) + '</div>'; });
 }
 
-// ---------- Secao: Estoque ----------
 let estoqueCache = [];
 
 function renderEstoque() {
@@ -167,11 +186,16 @@ function renderEstoque() {
     conteudo.innerHTML = pageHead('Estoque', 'Catálogo de itens e saldo atual disponível para distribuição.') +
         '<div id="msgEstoque"></div>' +
         '<div class="card-form">' +
-        '<form id="formNovoItem" class="row g-2">' +
-        '<div class="col-12 col-md-3"><input class="form-control" name="descricaoItem" placeholder="Descrição" required></div>' +
-        '<div class="col-12 col-md-3"><input class="form-control" name="categoria" placeholder="Categoria" required></div>' +
-        '<div class="col-12 col-md-3"><input class="form-control" name="unidadeMedida" placeholder="Unidade (kg, peça...)" required></div>' +
-        '<div class="col-12 col-md-3"><button class="btn-confirm w-100" style="padding:9px;" type="submit">Adicionar item</button></div>' +
+        '<label class="form-label" for="selectItemExistente">Item já cadastrado</label>' +
+        '<select class="form-select mb-2" id="selectItemExistente">' +
+        '<option value="">-- Buscar um item do catálogo ou cadastrar um novo abaixo --</option>' +
+        '</select>' +
+        '<form id="formEstoque" class="row g-2">' +
+        '<div class="col-12 col-sm-6 col-md-3"><input class="form-control" name="descricaoItem" placeholder="Descrição" required></div>' +
+        '<div class="col-12 col-sm-6 col-md-3"><input class="form-control" name="categoria" placeholder="Categoria" required></div>' +
+        '<div class="col-12 col-sm-6 col-md-3"><input class="form-control" name="unidadeMedida" placeholder="Unidade (kg, peça...)" required></div>' +
+        '<div class="col-12 col-sm-6 col-md-2"><input type="number" step="0.001" min="0.001" class="form-control" name="quantidade" placeholder="Quantidade" required></div>' +
+        '<div class="col-12 col-md-1"><button class="btn-confirm w-100" style="padding:9px;" type="submit">Salvar</button></div>' +
         '</form></div>' +
         '<div class="toolbar"><input type="search" id="buscaEstoque" placeholder="Buscar item…" aria-label="Buscar itens"></div>' +
         '<div class="table-wrap"><table><thead><tr><th>ID</th><th>Descrição</th><th>Categoria</th><th>Unidade</th><th>Saldo</th></tr></thead>' +
@@ -180,20 +204,68 @@ function renderEstoque() {
 
     document.getElementById('buscaEstoque').addEventListener('input', filtrarEstoque);
 
-    document.getElementById('formNovoItem').addEventListener('submit', function (ev) {
+    const formEstoque = document.getElementById('formEstoque');
+    const campoDescricao = formEstoque.elements.descricaoItem;
+    const campoCategoria = formEstoque.elements.categoria;
+    const campoUnidade = formEstoque.elements.unidadeMedida;
+    const campoQuantidade = formEstoque.elements.quantidade;
+
+    document.getElementById('selectItemExistente').addEventListener('change', function (ev) {
+        const item = estoqueCache.find(function (i) { return String(i.id) === ev.target.value; });
+        const selecionouExistente = !!item;
+
+        campoDescricao.value = selecionouExistente ? item.descricaoItem : '';
+        campoCategoria.value = selecionouExistente ? item.categoria : '';
+        campoUnidade.value = selecionouExistente ? item.unidadeMedida : '';
+        campoQuantidade.value = '';
+        campoQuantidade.placeholder = selecionouExistente ? 'Quantidade a adicionar' : 'Quantidade';
+
+        [campoDescricao, campoCategoria, campoUnidade].forEach(function (campo) {
+            campo.disabled = selecionouExistente;
+            campo.required = !selecionouExistente;
+        });
+    });
+
+    formEstoque.addEventListener('submit', function (ev) {
         ev.preventDefault();
-        const fd = new FormData(ev.target);
+        const msgEstoque = document.getElementById('msgEstoque');
+        const selectId = document.getElementById('selectItemExistente').value;
+        const quantidade = campoQuantidade.value;
+
+        if (selectId) {
+            apiJson('/api/estoque/' + selectId + '/entrada', 'POST', {
+                usuarioId: Number(getUsuarioId()), quantidade: Number(quantidade)
+            }).then(function (r) {
+                if (!r.ok) { return r.json().then(function (e) { throw new Error(mensagemErro(e)); }); }
+                renderEstoque();
+            }).catch(function (e) { msgEstoque.innerHTML = '<div class="alert alert-danger">' + escapeHtml(e.message) + '</div>'; });
+            return;
+        }
+
+        const descricaoItem = campoDescricao.value.trim();
+        const existente = estoqueCache.find(function (i) { return i.descricaoItem.toLowerCase() === descricaoItem.toLowerCase(); });
+        if (existente) {
+            msgEstoque.innerHTML = '<div class="alert alert-danger">Esse item já está cadastrado como "' +
+                escapeHtml(existente.descricaoItem) + '". Selecione-o na lista acima em vez de cadastrar novamente.</div>';
+            return;
+        }
+
         apiJson('/api/estoque', 'POST', {
-            descricaoItem: fd.get('descricaoItem'), categoria: fd.get('categoria'), unidadeMedida: fd.get('unidadeMedida')
+            descricaoItem: descricaoItem, categoria: campoCategoria.value, unidadeMedida: campoUnidade.value,
+            quantidadeInicial: Number(quantidade), usuarioId: Number(getUsuarioId())
         }).then(function (r) {
-            if (!r.ok) { return r.json().then(function (e) { throw new Error(e.message); }); }
+            if (!r.ok) { return r.json().then(function (e) { throw new Error(mensagemErro(e)); }); }
             renderEstoque();
-        }).catch(function (e) { document.getElementById('msgEstoque').innerHTML = '<div class="alert alert-danger">' + escapeHtml(e.message) + '</div>'; });
+        }).catch(function (e) { msgEstoque.innerHTML = '<div class="alert alert-danger">' + escapeHtml(e.message) + '</div>'; });
     });
 
     api('/api/estoque').then(function (r) { return r.json(); }).then(function (itens) {
         estoqueCache = itens;
         filtrarEstoque();
+        document.getElementById('selectItemExistente').innerHTML = '<option value="">-- Buscar um item do catálogo ou cadastrar um novo abaixo --</option>' +
+            itens.slice().sort(function (a, b) { return a.descricaoItem.localeCompare(b.descricaoItem); }).map(function (i) {
+                return '<option value="' + i.id + '">' + escapeHtml(i.descricaoItem) + ' (' + escapeHtml(i.categoria) + ')</option>';
+            }).join('');
     });
 }
 
@@ -209,7 +281,6 @@ function filtrarEstoque() {
     document.getElementById('contadorEstoque').textContent = 'Mostrando ' + filtrados.length + ' de ' + estoqueCache.length + ' itens';
 }
 
-// ---------- Secao: Distribuicoes ----------
 function renderDistribuicoes() {
     const conteudo = document.getElementById('conteudo');
     conteudo.innerHTML = pageHead('Distribuições', 'Registre a saída de itens do estoque para os beneficiários.') +
@@ -217,14 +288,27 @@ function renderDistribuicoes() {
         '<div class="card-form">' +
         '<form id="formNovaDistribuicao">' +
         '<div class="row g-2 mb-2">' +
-        '<div class="col-12 col-md-6"><input class="form-control" name="beneficiario" placeholder="Beneficiário" required></div>' +
-        '<div class="col-12 col-md-6"><input class="form-control" name="observacao" placeholder="Observação"></div>' +
+        '<div class="col-12 col-md-6">' +
+        '<label class="form-label" for="inputBeneficiario">Beneficiário:</label>' +
+        '<input class="form-control" id="inputBeneficiario" name="beneficiario" placeholder="Nome completo" required>' +
+        '</div>' +
+        '<div class="col-12 col-md-6">' +
+        '<label class="form-label" for="selectVoluntarioLiberacao">Voluntário que fez a liberação:</label>' +
+        '<select class="form-select" id="selectVoluntarioLiberacao" name="usuarioLiberacaoId" required>' +
+        '<option value="">-- selecione --</option>' +
+        '</select>' +
+        '</div>' +
         '</div>' +
         '<div id="itensDistribuicao"></div>' +
         '<button class="btn-confirm mt-2" style="padding:9px 18px;" type="submit">Registrar distribuição</button>' +
         '</form></div>' +
-        '<div class="table-wrap"><table><thead><tr><th>ID</th><th>Data</th><th>Beneficiário</th><th>Itens</th></tr></thead>' +
+        '<div class="table-wrap"><table><thead><tr><th>ID</th><th>Data</th><th>Beneficiário</th><th>Voluntário</th><th>Itens</th></tr></thead>' +
         '<tbody id="listaDistribuicoes">Carregando...</tbody></table></div>';
+
+    api('/api/usuarios/resumo').then(function (r) { return r.json(); }).then(function (usuarios) {
+        document.getElementById('selectVoluntarioLiberacao').innerHTML = '<option value="">-- selecione --</option>' +
+            usuarios.map(function (u) { return '<option value="' + u.id + '">' + escapeHtml(u.nome) + '</option>'; }).join('');
+    });
 
     api('/api/estoque').then(function (r) { return r.json(); }).then(function (itensEstoque) {
         let opcoes = '<option value="">-- item --</option>';
@@ -250,9 +334,9 @@ function renderDistribuicoes() {
             if (estoqueId && quantidade) { itens.push({ estoqueId: Number(estoqueId), quantidade: Number(quantidade) }); }
         }
         apiJson('/api/distribuicoes', 'POST', {
-            usuarioId: Number(getUsuarioId()), beneficiario: fd.get('beneficiario'), observacao: fd.get('observacao'), itens: itens
+            usuarioId: Number(fd.get('usuarioLiberacaoId')), beneficiario: fd.get('beneficiario'), itens: itens
         }).then(function (r) {
-            if (!r.ok) { return r.json().then(function (e) { throw new Error(e.message); }); }
+            if (!r.ok) { return r.json().then(function (e) { throw new Error(mensagemErro(e)); }); }
             renderDistribuicoes();
         }).catch(function (e) { document.getElementById('msgDistribuicao').innerHTML = '<div class="alert alert-danger">' + escapeHtml(e.message) + '</div>'; });
     });
@@ -261,13 +345,13 @@ function renderDistribuicoes() {
         let html = '';
         lista.forEach(function (d) {
             const itens = (d.itens || []).map(function (i) { return i.quantidade + ' ' + i.unidadeMedida + ' ' + i.descricaoItem; }).join(', ');
-            html += '<tr><td class="id-cell">' + d.id + '</td><td>' + formatarData(d.data) + '</td><td>' + escapeHtml(d.beneficiario) + '</td><td class="det">' + escapeHtml(itens) + '</td></tr>';
+            html += '<tr><td class="id-cell">' + d.id + '</td><td>' + formatarData(d.data) + '</td><td>' + escapeHtml(d.beneficiario) + '</td><td>' +
+                escapeHtml(d.voluntarioNome || '') + '</td><td class="det">' + escapeHtml(itens) + '</td></tr>';
         });
-        document.getElementById('listaDistribuicoes').innerHTML = html || '<tr><td colspan="4" class="text-center text-muted">Nenhuma distribuição registrada.</td></tr>';
+        document.getElementById('listaDistribuicoes').innerHTML = html || '<tr><td colspan="5" class="text-center text-muted">Nenhuma distribuição registrada.</td></tr>';
     });
 }
 
-// ---------- Secao: Relatorio ----------
 function renderRelatorio() {
     const conteudo = document.getElementById('conteudo');
     const hoje = new Date().toISOString().substring(0, 10);
@@ -299,7 +383,6 @@ function renderRelatorio() {
     });
 }
 
-// ---------- Secao: Horarios (ADMIN) ----------
 function renderHorarios() {
     const conteudo = document.getElementById('conteudo');
     conteudo.innerHTML = pageHead('Horários de Atendimento', 'Configure os horários e a capacidade de agendamento presencial.') +
@@ -311,32 +394,40 @@ function renderHorarios() {
         '</select></div>' +
         '<div class="col-12 col-md-3"><input type="time" class="form-control" name="horaInicio" required></div>' +
         '<div class="col-12 col-md-3"><input type="time" class="form-control" name="horaFim" required></div>' +
+        '<div class="col-12 col-md-3"><select class="form-select" id="selectVoluntarioHorario" name="usuarioId" required>' +
+        '<option value="">-- Voluntário --</option>' +
+        '</select></div>' +
         '<div class="col-12 col-md-3"><input type="number" min="1" class="form-control" name="capacidadeMaxima" placeholder="Capacidade" required></div>' +
         '<div class="col-12"><button class="btn-confirm" style="padding:9px 18px;" type="submit">Adicionar horário</button></div>' +
         '</form></div>' +
-        '<div class="table-wrap"><table><thead><tr><th>Dia</th><th>Início</th><th>Fim</th><th>Capacidade</th></tr></thead>' +
+        '<div class="table-wrap"><table><thead><tr><th>Dia</th><th>Início</th><th>Fim</th><th>Voluntário</th><th>Capacidade</th></tr></thead>' +
         '<tbody id="listaHorarios">Carregando...</tbody></table></div>';
+
+    api('/api/usuarios/resumo').then(function (r) { return r.json(); }).then(function (usuarios) {
+        document.getElementById('selectVoluntarioHorario').innerHTML = '<option value="">-- Voluntário --</option>' +
+            usuarios.map(function (u) { return '<option value="' + u.id + '">' + escapeHtml(u.nome) + '</option>'; }).join('');
+    });
 
     document.getElementById('formNovoHorario').addEventListener('submit', function (ev) {
         ev.preventDefault();
         const fd = new FormData(ev.target);
         apiJson('/api/horarios-atendimento', 'POST', {
             diaSemana: fd.get('diaSemana'), horaInicio: fd.get('horaInicio') + ':00', horaFim: fd.get('horaFim') + ':00',
-            capacidadeMaxima: Number(fd.get('capacidadeMaxima'))
+            capacidadeMaxima: Number(fd.get('capacidadeMaxima')), usuarioId: Number(fd.get('usuarioId'))
         }).then(function (r) {
-            if (!r.ok) { return r.json().then(function (e) { throw new Error(e.message); }); }
+            if (!r.ok) { return r.json().then(function (e) { throw new Error(mensagemErro(e)); }); }
             renderHorarios();
         }).catch(function (e) { document.getElementById('msgHorarios').innerHTML = '<div class="alert alert-danger">' + escapeHtml(e.message) + '</div>'; });
     });
 
     api('/api/horarios-atendimento').then(function (r) { return r.json(); }).then(function (lista) {
         document.getElementById('listaHorarios').innerHTML = lista.map(function (h) {
-            return '<tr><td>' + (DIA_SEMANA_LABELS[h.diaSemana] || h.diaSemana) + '</td><td>' + h.horaInicio + '</td><td>' + h.horaFim + '</td><td>' + h.capacidadeMaxima + '</td></tr>';
-        }).join('') || '<tr><td colspan="4" class="text-center text-muted">Nenhum horário cadastrado.</td></tr>';
+            return '<tr><td>' + (DIA_SEMANA_LABELS[h.diaSemana] || h.diaSemana) + '</td><td>' + h.horaInicio + '</td><td>' + h.horaFim + '</td><td>' +
+                escapeHtml(h.usuarioNome || '') + '</td><td>' + h.capacidadeMaxima + '</td></tr>';
+        }).join('') || '<tr><td colspan="5" class="text-center text-muted">Nenhum horário cadastrado.</td></tr>';
     });
 }
 
-// ---------- Secao: Usuarios (ADMIN) ----------
 function renderUsuarios() {
     const conteudo = document.getElementById('conteudo');
     conteudo.innerHTML = pageHead('Usuários', 'Voluntários e administradores com acesso ao painel.') +
@@ -358,7 +449,7 @@ function renderUsuarios() {
         apiJson('/api/usuarios', 'POST', {
             nome: fd.get('nome'), email: fd.get('email'), senha: fd.get('senha'), role: fd.get('role')
         }).then(function (r) {
-            if (!r.ok) { return r.json().then(function (e) { throw new Error(e.message); }); }
+            if (!r.ok) { return r.json().then(function (e) { throw new Error(mensagemErro(e)); }); }
             renderUsuarios();
         }).catch(function (e) { document.getElementById('msgUsuarios').innerHTML = '<div class="alert alert-danger">' + escapeHtml(e.message) + '</div>'; });
     });
@@ -370,7 +461,6 @@ function renderUsuarios() {
     });
 }
 
-// ---------- Secao: Dados Bancarios (ADMIN) ----------
 function renderDadosBancarios() {
     const conteudo = document.getElementById('conteudo');
     conteudo.innerHTML = pageHead('Dados Bancários / Pix', 'Informações exibidas ao doador na doação financeira.') +
@@ -394,7 +484,7 @@ function renderDadosBancarios() {
                 banco: fd.get('banco'), agencia: fd.get('agencia'), conta: fd.get('conta'),
                 chavePix: fd.get('chavePix'), titular: fd.get('titular')
             }).then(function (r) {
-                if (!r.ok) { return r.json().then(function (e) { throw new Error(e.message); }); }
+                if (!r.ok) { return r.json().then(function (e) { throw new Error(mensagemErro(e)); }); }
                 document.getElementById('msgDadosBancarios').innerHTML = '<div class="alert alert-success">Salvo com sucesso.</div>';
             }).catch(function (e) { document.getElementById('msgDadosBancarios').innerHTML = '<div class="alert alert-danger">' + escapeHtml(e.message) + '</div>'; });
         });
@@ -414,7 +504,7 @@ function irParaSecao(secao) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    if (!document.getElementById('conteudo')) { return; } // pagina de login nao tem dashboard
+    if (!document.getElementById('conteudo')) { return; }
 
     if (!getToken()) {
         window.location.href = '/admin/login';

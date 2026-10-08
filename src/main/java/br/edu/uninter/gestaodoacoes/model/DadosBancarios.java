@@ -10,10 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Registro unico (id fixo = 1) com os dados bancarios/chave Pix da associacao,
- * exibidos ao doador na doacao financeira (RF06) e editaveis pelo admin.
- */
 @Entity
 @Table(name = "dados_bancarios")
 @Getter

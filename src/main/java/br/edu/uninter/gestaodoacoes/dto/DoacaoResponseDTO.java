@@ -10,6 +10,7 @@ import br.edu.uninter.gestaodoacoes.model.TipoDoacao;
 public record DoacaoResponseDTO(
         Long id,
         Long doadorId,
+        String doadorNome,
         TipoDoacao tipo,
         StatusDoacao status,
         LocalDateTime dataCriacao,

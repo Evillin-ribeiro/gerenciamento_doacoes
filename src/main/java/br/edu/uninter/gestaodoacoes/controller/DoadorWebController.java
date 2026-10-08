@@ -12,10 +12,6 @@ import br.edu.uninter.gestaodoacoes.dto.DoadorRequestDTO;
 import br.edu.uninter.gestaodoacoes.dto.DoadorResponseDTO;
 import br.edu.uninter.gestaodoacoes.service.DoadorService;
 
-/**
- * Fluxo publico do doador (telas Thymeleaf), reaproveitando o DoadorService diretamente
- * em vez de chamar a API REST via HTTP.
- */
 @Controller
 @RequestMapping("/doadores")
 public class DoadorWebController {

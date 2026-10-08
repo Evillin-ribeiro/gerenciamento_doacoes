@@ -11,10 +11,6 @@ import br.edu.uninter.gestaodoacoes.exception.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- * Substitui a resposta padrao do Spring Security por um JSON consistente quando um usuario autenticado
- * tenta acessar uma rota que exige um papel (role) que ele nao possui (ex.: VOLUNTARIO em rota so-ADMIN).
- */
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
 

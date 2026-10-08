@@ -36,7 +36,6 @@ h1, h2, h3, h4, .navbar-brand, .brand {
     font-family: 'Lora', serif;
 }
 
-/* ---------- Cabecalho (fragments/nav.html) ---------- */
 .site-header {
     display: flex;
     align-items: center;
@@ -82,7 +81,6 @@ h1, h2, h3, h4, .navbar-brand, .brand {
     .site-header nav a.admin { display: none; }
 }
 
-/* ---------- Hero / home ---------- */
 .hero { max-width: 760px; margin: 0 auto; padding: 24px 6vw 8px; text-align: center; }
 .eyebrow { font-size: 0.82rem; color: var(--ink-soft); margin: 0 0 14px; }
 .hero h1 {
@@ -100,7 +98,6 @@ h1, h2, h3, h4, .navbar-brand, .brand {
     margin: 0 auto;
 }
 
-/* ---------- Carrossel de frases ---------- */
 .quote-wrap { position: relative; margin: 44px 0 0; max-width: 760px; }
 .quote-card {
     background: var(--card-quote-bg);
@@ -167,11 +164,9 @@ h1, h2, h3, h4, .navbar-brand, .brand {
     .quote-arrow { display: none; }
 }
 
-/* ---------- CTA ---------- */
 .cta-block { text-align: center; margin: 48px auto 64px; max-width: 760px; }
 .cta-note { margin-top: 14px; font-size: 0.85rem; color: var(--ink-soft); }
 
-/* ---------- Valores ---------- */
 .values {
     max-width: 760px; margin: 0 auto;
     border-top: 1px solid var(--line);
@@ -186,7 +181,6 @@ h1, h2, h3, h4, .navbar-brand, .brand {
     .values { grid-template-columns: 1fr; gap: 26px; }
 }
 
-/* ---------- Botoes (reutilizados nas telas de formulario/admin) ---------- */
 .btn-azul, .cta {
     background: var(--indigo);
     border-color: var(--indigo);
@@ -208,7 +202,6 @@ h1, h2, h3, h4, .navbar-brand, .brand {
 }
 .btn-outline-azul:hover { background: var(--indigo); color: #FBF7F0; }
 
-/* ---------- Formularios e cards (telas internas) ---------- */
 .form-control:focus, .form-select:focus {
     border-color: var(--gold);
     box-shadow: 0 0 0 0.2rem rgba(189, 145, 66, 0.25);
@@ -216,11 +209,6 @@ h1, h2, h3, h4, .navbar-brand, .brand {
 .card { border-color: var(--line); }
 .table { color: var(--ink); }
 
-/* ======================================================================
-   Painel administrativo
-   ====================================================================== */
-
-/* ---------- Barra superior fixa ---------- */
 .admin-header {
     background: var(--indigo-deep);
     display: flex;
@@ -274,7 +262,6 @@ h1, h2, h3, h4, .navbar-brand, .brand {
     .admin-header .who { display: none; }
 }
 
-/* ---------- Area de conteudo ---------- */
 .admin-main { max-width: 1180px; margin: 0 auto; padding: 36px 28px 80px; }
 .page-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
 .page-head h1 { font-weight: 600; font-size: 1.9rem; margin: 0; }
@@ -284,7 +271,6 @@ h1, h2, h3, h4, .navbar-brand, .brand {
     .page-head h1 { font-size: 1.5rem; }
 }
 
-/* ---------- Chips de estatistica ---------- */
 .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
 .stat { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 10px 16px; font-size: 0.86rem; }
 .stat .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -294,13 +280,11 @@ h1, h2, h3, h4, .navbar-brand, .brand {
 .dot.canc { background: var(--terracotta); }
 .dot.entregue { background: var(--indigo); }
 
-/* ---------- Barra de ferramentas (busca/filtros) ---------- */
 .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
 .toolbar input[type="search"] { flex: 1 1 240px; max-width: 320px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); color: var(--ink); font-size: 0.9rem; }
 .toolbar select { padding: 9px 12px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); color: var(--ink); font-size: 0.9rem; }
 .toolbar input:focus, .toolbar select:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
 
-/* ---------- Tabela ---------- */
 .table-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: auto; }
 .table-wrap table { width: 100%; border-collapse: collapse; min-width: 640px; font-size: 0.92rem; margin-bottom: 0; }
 .table-wrap thead th { text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.02em; color: var(--ink-soft); padding: 14px 18px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--surface); }
@@ -314,14 +298,12 @@ h1, h2, h3, h4, .navbar-brand, .brand {
 .tipo-cell { display: flex; align-items: center; gap: 9px; font-weight: 500; }
 .tipo-cell svg { width: 16px; height: 16px; color: var(--ink-soft); flex-shrink: 0; }
 
-/* ---------- Badges de status ---------- */
 .badge-status { display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em; padding: 4px 10px; border-radius: 20px; }
 .badge-status.pend { background: var(--gold-tint); color: #7A5A22; }
 .badge-status.conf { background: var(--green-tint); color: var(--green); }
 .badge-status.canc { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); }
 .badge-status.entregue { background: var(--bg-raised); color: var(--indigo); }
 
-/* ---------- Botoes de acao em tabela ---------- */
 .actions { display: flex; gap: 8px; white-space: nowrap; }
 .actions .btn-confirm, .actions .btn-cancel { font-size: 0.82rem; font-weight: 600; padding: 7px 14px; border-radius: 3px; cursor: pointer; border: 1px solid transparent; }
 .actions .btn-confirm { background: var(--indigo); color: #FBF7F0; }
@@ -329,7 +311,9 @@ h1, h2, h3, h4, .navbar-brand, .brand {
 .actions .btn-cancel { background: transparent; color: var(--terracotta); border-color: var(--terracotta); }
 .actions .btn-cancel:hover { background: var(--terracotta-tint); }
 
+.btn-link-comprovante { display: inline-block; margin-left: 8px; font-size: 0.8rem; font-weight: 600; color: var(--indigo); background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; }
+.btn-link-comprovante:hover { color: var(--indigo-deep); }
+
 .foot-row { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.85rem; color: var(--ink-soft); }
 
-/* ---------- Formularios dentro do painel ---------- */
 .admin-main .card-form { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 20px; margin-bottom: 22px; }
